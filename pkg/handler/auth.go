@@ -22,8 +22,27 @@ func (hnd *Handler) signUp(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, map[string]interface{}{
 		"id": id,
 	})
-
 }
-func (hnd *Handler) signIn(ctx *gin.Context) {
 
+type SignInInput struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+func (hnd *Handler) signIn(ctx *gin.Context) {
+	var input SignInInput
+
+	if err := ctx.BindJSON(&input); err != nil {
+		newErrorResponse(ctx, http.StatusBadRequest, err.Error())
+	}
+
+	token, err := hnd.services.Authorization.GenerateToken(input.Username, input.Password)
+	if err != nil {
+		newErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	ctx.JSON(http.StatusOK, map[string]interface{}{
+		"token": token,
+	})
 }

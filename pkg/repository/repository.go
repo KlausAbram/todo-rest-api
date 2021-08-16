@@ -15,6 +15,7 @@ const (
 
 type Authorization interface {
 	CreateUser(user todoapi.User) (int, error)
+	GetUser(username, password string) (todoapi.User, error)
 }
 
 type TodoList interface {
