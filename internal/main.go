@@ -1,5 +1,9 @@
 package main
 
+//command execute db:
+// docker run --name=todo-db -e POSTGRES_PASSWORD=qwerty -p 5436:5432 -d --rm postgres
+// migrate -path ./schema -database postgres://postgres:qwerty@localhost:5436/postgres?sslmode=disable up
+
 import (
 	"github.com/joho/godotenv"
 	todoapi "github.com/klaus-abram/todo-rest-api"
@@ -7,18 +11,20 @@ import (
 	"github.com/klaus-abram/todo-rest-api/pkg/repository"
 	"github.com/klaus-abram/todo-rest-api/pkg/service"
 	_ "github.com/lib/pq"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"log"
 	"os"
 )
 
 func main() {
+	logrus.SetFormatter(new(logrus.JSONFormatter))
+
 	if err := initConfig(); err != nil {
-		log.Fatalf("error initialising configs %s", err.Error())
+		logrus.Fatalf("error initialising configs %s", err.Error())
 	}
 
 	if err := godotenv.Load(); err != nil {
-		log.Fatalf("error loading env variables %s", err.Error())
+		logrus.Fatalf("error loading env variables %s", err.Error())
 	}
 
 	db, err := repository.NewPostgresDB(repository.Config{
@@ -31,7 +37,7 @@ func main() {
 	})
 
 	if err != nil {
-		log.Fatalf("failed to initialize db: %s", err.Error())
+		logrus.Fatalf("failed to initialize db: %s", err.Error())
 	}
 
 	repo := repository.NewRepository(db)
@@ -40,7 +46,7 @@ func main() {
 
 	serv := new(todoapi.Server)
 	if errRun := serv.RunServer(viper.GetString("port"), handlers.InitRoutes()); errRun != nil {
-		log.Fatalf("error with the running the http server %s", errRun.Error())
+		logrus.Fatalf("error with the running the http server %s", errRun.Error())
 	}
 }
 
