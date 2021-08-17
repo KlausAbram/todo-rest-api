@@ -2,14 +2,19 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	todoapi "github.com/klaus-abram/todo-rest-api"
 	"github.com/sirupsen/logrus"
 )
 
-type errorResp struct {
+type errorResponse struct {
 	Message string `json:"message"`
+}
+
+type getAllListsResponse struct {
+	Data []todoapi.TodoList `json:"data"`
 }
 
 func newErrorResponse(c *gin.Context, statusCode int, message string) {
 	logrus.Error(message)
-	c.AbortWithStatusJSON(statusCode, errorResp{message})
+	c.AbortWithStatusJSON(statusCode, errorResponse{message})
 }
