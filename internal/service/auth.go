@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt"
 	todoapi "github.com/klaus-abram/todo-rest-api"
-	"github.com/klaus-abram/todo-rest-api/pkg/repository"
+	"github.com/klaus-abram/todo-rest-api/internal/repository"
 	"os"
 	"time"
 )

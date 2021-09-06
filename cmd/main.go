@@ -5,15 +5,18 @@ package main
 // migrate -path ./schema -database postgres://postgres:qwerty@localhost:5436/postgres?sslmode=disable up
 
 import (
+	"context"
 	"github.com/joho/godotenv"
 	todoapi "github.com/klaus-abram/todo-rest-api"
-	"github.com/klaus-abram/todo-rest-api/pkg/handler"
-	"github.com/klaus-abram/todo-rest-api/pkg/repository"
-	"github.com/klaus-abram/todo-rest-api/pkg/service"
+	"github.com/klaus-abram/todo-rest-api/internal/handler"
+	"github.com/klaus-abram/todo-rest-api/internal/repository"
+	"github.com/klaus-abram/todo-rest-api/internal/service"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
@@ -45,9 +48,28 @@ func main() {
 	handlers := handler.NewHandler(services)
 
 	serv := new(todoapi.Server)
-	if errRun := serv.RunServer(viper.GetString("port"), handlers.InitRoutes()); errRun != nil {
-		logrus.Fatalf("error with the running the http server %s", errRun.Error())
+	go func() {
+		if errRun := serv.RunServer(viper.GetString("port"), handlers.InitRoutes()); errRun != nil {
+			logrus.Fatalf("error with the running the http server %s", errRun.Error())
+		}
+	}()
+
+	logrus.Print("todo-rest-app - started")
+
+	quit := make(chan os.Signal)
+	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+	<-quit
+
+	logrus.Print("todo-rest-app - shutting down")
+
+	if err := serv.ShutdownServer(context.Background()); err != nil {
+		logrus.Errorf("error with server shutting down %s", err.Error())
 	}
+
+	if err := db.Close(); err != nil {
+		logrus.Errorf("error occurred on db disconnect %s", err.Error())
+	}
+
 }
 
 func initConfig() error {
