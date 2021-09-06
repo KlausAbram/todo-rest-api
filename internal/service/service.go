@@ -5,6 +5,8 @@ import (
 	"github.com/klaus-abram/todo-rest-api/internal/repository"
 )
 
+//go:generate mockgen -source=service.go -destination=mocks/mock.go
+
 type Authorization interface {
 	CreateUser(user todoapi.User) (int, error)
 	GenerateToken(username, password string) (string, error)
