@@ -13,7 +13,7 @@ import (
 	"testing"
 )
 
-func TestHandler_signUp(t *testing.T) {
+func TestHandler_SignUp(t *testing.T) {
 	// Init Test Table
 	type mockBehavior func(r *servicemocks.MockAuthorization, user todoapi.User)
 

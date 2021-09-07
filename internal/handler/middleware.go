@@ -14,13 +14,9 @@ const (
 
 func (hnd *Handler) userIdentity(ctx *gin.Context) {
 	header := ctx.GetHeader(authorizationHeader)
-	if header == "" {
-		newErrorResponse(ctx, http.StatusUnauthorized, "empty auth header")
-		return
-	}
 
 	headerParts := strings.Split(header, " ")
-	if len(headerParts) != 2 || headerParts[0] != "Bearer" {
+	if len(headerParts) != 2 || headerParts[0] != "Bearer" || header == "" {
 		newErrorResponse(ctx, http.StatusUnauthorized, "invalid auth header")
 		return
 	}
